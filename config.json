@@ -1,7 +1,8 @@
 {
-  "enabled": false,
-  "message": "Licenza scaduta, contattare l'autore alla mail: samuele.sartori1108@gmail.com."
+  "enabled": true,
+  "message": "Licenza scaduta, contattare l'autore alla mail: samuele.sartori1108@gmail.com"
 }
+
 
 
 

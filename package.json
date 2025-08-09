@@ -1,0 +1,38 @@
+{
+  "name": "kneip-exe",
+  "version": "1.0.0",
+  "description": "App desktop per gestione centro Kneip",
+  "main": "main.js",
+  "author": "Samuele Sartori",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.samuelesartori.kneipsa",
+    "productName": "KNEIP S.A.",
+    "copyright": "Copyright © 2025",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}

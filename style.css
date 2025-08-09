@@ -1,0 +1,228 @@
+:root {
+  --bg: #f4f6f8;
+  --card: #ffffff;
+  --primary: #0057a3;
+  --success: #28a745;
+  --danger: #dc3545;
+  --text: #2c3e50;
+  --muted: #7f8c8d;
+  --radius: 12px;
+  --shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0 20px;
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  background: var(--card);
+  padding: 40px 30px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+header {
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--primary);
+  font-weight: bold;
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1.5px solid #d1d9e6;
+  border-radius: var(--radius);
+  box-sizing: border-box;
+  background: #fff;
+  transition: border-color 0.3s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 6px rgba(0, 87, 163, 0.4);
+}
+
+/* Buttons */
+button {
+  background: var(--primary);
+  color: #fff;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 87, 163, 0.2);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+button:hover {
+  background: #003d75;
+  box-shadow: 0 6px 14px rgba(0, 61, 117, 0.4);
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* List (if needed) */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  background: var(--card);
+  padding: 12px 16px;
+  border-left: 5px solid;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+li.entrata {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+li.uscita {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .container {
+    padding: 25px 20px;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  background-color: var(--card);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 12px 0;
+  margin-bottom: 30px;
+}
+
+.navbar a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.navbar a:hover,
+.navbar a.active {
+  background-color: rgba(0, 87, 163, 0.1);
+  color: var(--primary);
+}
+
+  #conteggioPersone {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #333;
+    background-color: #f9f9f9;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #conteggioPersone span {
+    color: #4CAF50;
+  }
+
+  .form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  flex: 1 1 calc(33.333% - 10px);
+  min-width: 100px;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Colori coerenti con gli altri */
+#addBtn {
+  background-color: var(--primary);
+  color: white;
+}
+
+#resetBtn {
+  background-color: var(--danger);
+  color: white;
+}
+
+#backupBtn {
+  background-color: var(--success);
+  color: white;
+}
+
+.lista-box {
+  max-height: 300px;
+  overflow-y: auto;
+}

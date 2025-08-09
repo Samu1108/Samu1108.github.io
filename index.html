@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PERCORSO_KNEIP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="navbar">
+      <a href="index.html" class="active">Add client</a>
+      <a href="conto.html">Info</a>
+      <a href="stats.html">Stats</a>
+    </nav>
+
+    <header>
+      <h1>SITO GESTIONALE PERCORSO KNEIP SANT'ANTONIO</h1>
+    </header>
+
+<div class="form-container">
+  <div class="form-box">
+    <h3> Adulti (over 14 anni)</h3>
+    <label for="numeroAdulti">Numero di adulti:</label>
+    <select id="numeroAdulti">
+      <option value="">-- Seleziona --</option>
+      <option value="1">1 adulto</option>
+      <option value="2">2 adulti</option>
+      <option value="3">3 adulti</option>
+      <option value="4">4 adulti</option>
+      <option value="5">5 adulti</option>
+      <option value="6">6 adulti</option>
+    </select>
+  </div>
+
+  <div class="form-box">
+    <h3> Bambini (under 14 anni)</h3>
+    <label for="numeroBambini">Numero di bambini:</label>
+    <select id="numeroBambini">
+      <option value="">-- Seleziona --</option>
+      <option value="1">1 bambino</option>
+      <option value="2">2 bambini</option>
+      <option value="3">3 bambini</option>
+      <option value="4">4 bambini</option>
+      <option value="5">5 bambini</option>
+      <option value="6">6 bambini</option>
+    </select>
+  </div>
+</div>
+
+    <div class="form-group">
+      <label for="orario">ORARIO:</label>
+      <input type="time" id="orario" step="60" />
+    </div>
+
+    <div class="form-group">
+      <label for="data">Date:</label>
+      <input type="date" id="data" />
+    </div>
+    <div class="form-actions">
+      <button id="addBtn">Add</button>
+      <button id="resetBtn">Reset</button>
+      <button id="backupBtn">Download Backup</button>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDYiXjIGccT_jD8a6C4iW8gMgh1ruby6sg",
+    authDomain: "gestionale-kneip.firebaseapp.com",
+    projectId: "gestionale-kneip",
+    storageBucket: "gestionale-kneip.firebasestorage.app",
+    messagingSenderId: "154033977872",
+    appId: "1:154033977872:web:e7c5d15698ad6ccf4f2895",
+    measurementId: "G-ER3BHZWYP5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const descrizioneInput = document.getElementById("descrizione");
+  const orarioInput = document.getElementById("orario");
+  const dataInput = document.getElementById("data");
+
+  // Data di oggi
+  function getToday() {
+    const today = new Date();
+    today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+    return today.toISOString().split("T")[0];
+  }
+
+  // Orario attuale
+  function getMinuto() {
+    const oggi = new Date();
+    const ore = String(oggi.getHours()).padStart(2, '0');
+    const minuti = String(oggi.getMinutes()).padStart(2, '0');
+    return `${ore}:${minuti}`;
+  }
+
+  // Imposta i valori di default alla apertura pagina
+  window.addEventListener("DOMContentLoaded", () => {
+    dataInput.value = getToday();
+    orarioInput.value = getMinuto();
+  });
+
+  async function aggiungiCliente() {
+  const orario = orarioInput.value;
+  const data = dataInput.value;
+  const numeroAdulti = parseInt(document.getElementById("numeroAdulti").value) || 0;
+  const numeroBambini = parseInt(document.getElementById("numeroBambini").value) || 0;
+
+  if (!orario || !data || (numeroAdulti === 0 && numeroBambini === 0)) {
+    alert("⚠️ Inserisci almeno un adulto o un bambino e compila orario/data!");
+    return;
+  }
+
+  try {
+    // 🔹 Salva adulti
+    for (let i = 0; i < numeroAdulti; i++) {
+      await addDoc(collection(db, "clienti"), {
+        descrizione: "ADULTO",
+        orario,
+        data
+      });
+    }
+
+    // 🔹 Salva bambini
+    for (let i = 0; i < numeroBambini; i++) {
+      await addDoc(collection(db, "clienti"), {
+        descrizione: "BAMBINO",
+        orario,
+        data
+      });
+    }
+
+    alert(`✅ Salvati ${numeroAdulti} adulti e ${numeroBambini} bambini!`);
+    resetCampi();
+  } catch (error) {
+    console.error("Errore durante il salvataggio:", error);
+    alert("❌ Errore nel salvataggio!");
+  }
+}
+
+
+  // Reset campi
+  function resetCampi() {
+  document.getElementById("numeroAdulti").value = "";
+  document.getElementById("numeroBambini").value = "";
+  orarioInput.value = getMinuto();
+  dataInput.value = getToday();
+}
+
+
+ // Download PDF clienti di oggi con descrizioni leggibili
+async function downloadBackup() {
+  const q = query(collection(db, "clienti"), orderBy("data", "asc"));
+  const snapshot = await getDocs(q);
+  const oggi = getToday();
+
+  const clientiOggi = snapshot.docs
+    .map(doc => doc.data())
+    .filter(d => d.data === oggi);
+
+  if (clientiOggi.length === 0) {
+    alert("Nessun cliente registrato oggi.");
+    return;
+  }
+
+  let adulti = 0;
+  let bambini = 0;
+
+  const righe = clientiOggi.map((cliente, index) => {
+    let tipo = "ADULTO";
+    if (
+      cliente.descrizione.toLowerCase().includes("girapale") ||
+      cliente.descrizione.toLowerCase().includes("bambino")
+    ) {
+      tipo = "BAMBINO";
+    } else {
+      tipo = "ADULTO";
+    }
+
+    // Conta
+    if (tipo === "ADULTO") adulti++;
+    else bambini++;
+
+    return `${index + 1}. ${tipo} - ${cliente.orario}`;
+  });
+
+// Genera PDF con jsPDF
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+// Intestazione
+doc.setFont("Helvetica", "bold");
+doc.setFontSize(16);
+doc.text(`Registro Clienti - ${oggi}`, 10, 15);
+
+doc.setFont("Helvetica", "normal");
+doc.setFontSize(12);
+doc.text(`Totale clienti: ${clientiOggi.length}`, 10, 30);
+doc.text(`Adulti: ${adulti}`, 10, 38);
+doc.text(`Bambini: ${bambini}`, 10, 46);
+
+doc.setFont("Helvetica", "bold");
+doc.text("Elenco clienti:", 10, 60);
+
+// Elenco clienti a colonne
+doc.setFont("Helvetica", "normal");
+let y = 70;
+let col = 0;
+const colonneX = [10, 70, 130]; // 3 colonne: sinistra, centro, destra
+  righe.forEach((riga, i) => {
+    doc.text(riga, colonneX[col], y);
+    y += 8;
+
+    if (y > 280) {
+      col++;
+      y = 70;
+      if (col >= colonneX.length) {
+        // Troppo lungo → nuova pagina
+        doc.addPage();
+        col = 0;
+        y = 70;
+      }
+    }
+  });
+
+  doc.save(`clienti_${oggi}.pdf`);
+}
+
+// Event listeners
+document.getElementById("addBtn").addEventListener("click", aggiungiCliente);
+document.getElementById("resetBtn").addEventListener("click", resetCampi);
+document.getElementById("backupBtn").addEventListener("click", downloadBackup);
+</script>
+
+</script>
+</body>
+</html>

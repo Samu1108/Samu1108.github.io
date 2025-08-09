@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>PERCORSO_KNEIP - Statistiche</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .stat-box {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  max-width: 500px;
+  margin: 30px auto;
+  text-align: center;
+  font-size: 1.4rem;
+}
+
+.stat-box p {
+  margin: 20px 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+select {
+  padding: 16px 20px;
+  font-size: 1.3rem;
+  border-radius: 12px;
+  border: 2px solid #ccc;
+  width: 100%;
+  max-width: 350px;
+  margin: 20px auto;
+  display: block;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="navbar">
+      <a href="index.html">Add client</a>
+      <a href="conto.html">Info</a>
+      <a href="stats.html" class="active">Stats</a>
+    </nav>
+
+    <h1 style="text-align:center;">📊 Statistiche Giornaliere</h1>
+
+    <select id="dataSelezionata">
+      <option value="">-- Seleziona una data --</option>
+    </select>
+
+    <div class="stat-box" id="risultatiStats" style="display:none;">
+      <p> Adulti: <span id="adultiStats">0</span></p>
+      <p> Bambini: <span id="bambiniStats">0</span></p>
+      <p> Totale: <span id="totaleStats">0</span></p>
+      <p> Incasso: <span id="incassoStats">0.00</span> €</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDYiXjIGccT_jD8a6C4iW8gMgh1ruby6sg",
+      authDomain: "gestionale-kneip.firebaseapp.com",
+      projectId: "gestionale-kneip",
+      storageBucket: "gestionale-kneip.appspot.com",
+      messagingSenderId: "154033977872",
+      appId: "1:154033977872:web:e7c5d15698ad6ccf4f2895",
+      measurementId: "G-ER3BHZWYP5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const dataSelect = document.getElementById("dataSelezionata");
+    const adultiSpan = document.getElementById("adultiStats");
+    const bambiniSpan = document.getElementById("bambiniStats");
+    const totaleSpan = document.getElementById("totaleStats");
+    const incassoSpan = document.getElementById("incassoStats");
+    const risultatiBox = document.getElementById("risultatiStats");
+
+    async function caricaDateDisponibili() {
+      const snapshot = await getDocs(collection(db, "clienti"));
+      const dateUniche = new Set();
+
+      snapshot.forEach(doc => {
+        const data = doc.data().data;
+        if (data) dateUniche.add(data);
+      });
+
+      const dateOrdinate = Array.from(dateUniche).sort();
+
+      dateOrdinate.forEach(data => {
+        const option = document.createElement("option");
+        option.value = data;
+        option.textContent = data;
+        dataSelect.appendChild(option);
+      });
+    }
+
+    async function mostraStatsPerData(dataSelezionata) {
+      const snapshot = await getDocs(collection(db, "clienti"));
+
+      let adulti = 0;
+      let bambini = 0;
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (d.data === dataSelezionata) {
+          const desc = (d.descrizione || "").toLowerCase();
+          if (desc.includes("bambino") || desc.includes("girapale")) {
+            bambini++;
+          } else {
+            adulti++;
+          }
+        }
+      });
+
+      const totale = adulti + bambini;
+      const incasso = adulti * 3 + bambini * 2;
+
+      adultiSpan.textContent = adulti;
+      bambiniSpan.textContent = bambini;
+      totaleSpan.textContent = totale;
+      incassoSpan.textContent = incasso.toFixed(2);
+      risultatiBox.style.display = "block";
+    }
+
+    dataSelect.addEventListener("change", (e) => {
+      const valore = e.target.value;
+      if (valore) {
+        mostraStatsPerData(valore);
+      } else {
+        risultatiBox.style.display = "none";
+      }
+    });
+
+    caricaDateDisponibili();
+  </script>
+</body>
+</html>

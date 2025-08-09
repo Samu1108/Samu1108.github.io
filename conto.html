@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>PERCORSO_KNEIP - Info</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="navbar">
+      <a href="index.html">Add client</a>
+      <a href="conto.html" class="active">Info</a>
+      <a href="stats.html">Stats</a>
+    </nav>
+
+    <!-- Box con conteggio -->
+    <div id="conteggioPersone" class="stat-box">
+      <p> Adulti: <span id="adultiCount">0</span></p>
+      <p> Bambini: <span id="bambiniCount">0</span></p>
+      <p> Totale: <span id="totaleCount">0</span></p>
+    </div>
+
+    <!-- Lista clienti in box scrollabile -->
+<div class="lista-box">
+  <ul id="listaClienti"></ul>
+</div>
+<button id="mostraAltroBtn">Mostra altri</button>
+
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, query, orderBy, startAfter, limit
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDYiXjIGccT_jD8a6C4iW8gMgh1ruby6sg",
+      authDomain: "gestionale-kneip.firebaseapp.com",
+      projectId: "gestionale-kneip",
+      storageBucket: "gestionale-kneip.appspot.com",
+      messagingSenderId: "154033977872",
+      appId: "1:154033977872:web:e7c5d15698ad6ccf4f2895",
+      measurementId: "G-ER3BHZWYP5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const lista = document.getElementById("listaClienti");
+    const mostraAltroBtn = document.getElementById("mostraAltroBtn");
+
+    const adultiSpan = document.getElementById("adultiCount");
+    const bambiniSpan = document.getElementById("bambiniCount");
+    const totaleSpan = document.getElementById("totaleCount");
+
+    let ultimoDocumento = null;
+    const BATCH_SIZE = 5;
+
+    // Data di oggi
+    function getToday() {
+      const oggi = new Date();
+      oggi.setMinutes(oggi.getMinutes() - oggi.getTimezoneOffset());
+      return oggi.toISOString().split("T")[0];
+    }
+
+    // Conta persone registrate oggi
+    async function contaPersoneTotali() {
+  const q = query(collection(db, "clienti")); // Prendi tutto senza limiti
+  const snapshot = await getDocs(q);
+
+  let adulti = 0;
+  let bambini = 0;
+
+  snapshot.forEach(doc => {
+    const cliente = doc.data();
+    const desc = cliente.descrizione?.toLowerCase() || "";
+    if (desc.includes("bambino") || desc.includes("girapale")) {
+      bambini++;
+    } else {
+      adulti++;
+    }
+  });
+
+  const totale = adulti + bambini;
+  adultiSpan.textContent = adulti;
+  bambiniSpan.textContent = bambini;
+  totaleSpan.textContent = totale;
+}
+
+    // Carica lista clienti
+    async function caricaTransazioni() {
+      let q;
+      if (ultimoDocumento) {
+        q = query(collection(db, "clienti"), orderBy("data", "asc"), startAfter(ultimoDocumento), limit(BATCH_SIZE));
+      } else {
+        q = query(collection(db, "clienti"), orderBy("data", "asc"), limit(BATCH_SIZE));
+      }
+
+      const snapshot = await getDocs(q);
+
+      if (snapshot.docs.length === 0) {
+        mostraAltroBtn.disabled = true;
+        mostraAltroBtn.textContent = "Nessun altro cliente";
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${d.data} - ${d.descrizione} alle ${d.orario}`;
+        lista.appendChild(li);
+      });
+
+      ultimoDocumento = snapshot.docs[snapshot.docs.length - 1];
+    }
+
+    // Avvio
+    mostraAltroBtn.addEventListener("click", caricaTransazioni);
+    contaPersoneTotali();
+    caricaTransazioni();
+  </script>
+</body>
+</html>
